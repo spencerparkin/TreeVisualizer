@@ -5,6 +5,8 @@ set(TREE_VIZ_SOURCES
 	Source/Frame.h
 	Source/Canvas.cpp
 	Source/Canvas.h
+	Source/Tree.cpp
+	Source/Tree.h
 )
 
 add_executable(TreeVisualizer WIN32
