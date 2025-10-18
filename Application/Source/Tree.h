@@ -27,17 +27,20 @@ public:
 
 		virtual void Layout();
 		virtual void Render();
+		virtual void RenderBranches();
 		virtual void RenderSubtree();
 		virtual void Translate(const HappyMath::Vector2& translation);
+		virtual void TranslateSubtree(const HappyMath::Vector2& translation);
 		virtual void CalcBoundingRect();
 
-	protected:
+	public:
 		HappyMath::Rectangle boundingRect;
 		HappyMath::Rectangle subTreeBoundingRect;
 		std::vector<std::shared_ptr<Node>> childNodeArray;
 		std::weak_ptr<Node> parentNode;
 	};
 
-protected:
+public:
+	bool layoutNeeded;
 	std::shared_ptr<Node> rootNode;
 };

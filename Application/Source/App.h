@@ -3,6 +3,7 @@
 #include <wx/app.h>
 
 class Frame;
+class Tree;
 
 /**
  * 
@@ -17,9 +18,12 @@ public:
 	virtual int OnExit() override;
 
 	Frame* GetFrame();
+	Tree* GetTree();
 
 private:
 	Frame* frame;
+
+	std::shared_ptr<Tree> tree;
 };
 
 wxDECLARE_APP(App);

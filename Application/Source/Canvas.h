@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wx/glcanvas.h>
+#include "HappyMath/Rectangle.h"
 
 class Canvas : public wxGLCanvas
 {
@@ -13,5 +14,6 @@ public:
 
 private:
 
+	HappyMath::Rectangle worldRect;
 	wxGLContext* renderContext;
 };

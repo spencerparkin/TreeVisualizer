@@ -5,7 +5,7 @@
 #include <wx/sizer.h>
 #include <wx/aboutdlg.h>
 
-Frame::Frame(const wxPoint& pos, const wxSize& size) : wxFrame(nullptr, wxID_ANY, wxT("Clue"), pos, size)
+Frame::Frame(const wxPoint& pos, const wxSize& size) : wxFrame(nullptr, wxID_ANY, wxT("Tree Visualizer"), pos, size)
 {
 	wxMenu* programMenu = new wxMenu();
 	programMenu->Append(new wxMenuItem(programMenu, ID_Exit, "Exit", "Close this program."));
