@@ -4,6 +4,7 @@
 #include "Frame.h"
 #include "Tree.h"
 #include <gl/GLU.h>
+#include <GL/glut.h>
 #include <math.h>
 
 static int attributeList[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, 0 };

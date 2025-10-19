@@ -7,6 +7,12 @@ set(TREE_VIZ_SOURCES
 	Source/Canvas.h
 	Source/Tree.cpp
 	Source/Tree.h
+	Source/Trees/BTree.cpp
+	Source/Trees/BTree.h
+	Source/Trees/RBTree.cpp
+	Source/Trees/RBTree.h
+	Source/Trees/AVLTree.cpp
+	Source/Trees/AVLTree.h
 )
 
 add_executable(TreeVisualizer WIN32
@@ -25,9 +31,18 @@ target_compile_definitions(TreeVisualizer PRIVATE
 	_USE_MATH_DEFINES
 )
 
+target_include_directories(TreeVisualizer PRIVATE
+	"${PROJECT_SOURCE_DIR}/ThirdParty/FreeGLUT/include"
+)
+
+target_link_directories(TreeVisualizer PRIVATE
+	"${PROJECT_SOURCE_DIR}/ThirdParty/FreeGLUT/lib/x64"
+)
+
 target_link_libraries(TreeVisualizer
 	HappyMath
 	wx::core
 	wx::base
 	wx::gl
+	freeglut.lib
 )

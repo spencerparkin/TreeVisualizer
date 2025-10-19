@@ -1,5 +1,6 @@
 #include "Tree.h"
 #include <wx/glcanvas.h>
+#include <format>
 
 using namespace HappyMath;
 
@@ -7,6 +8,7 @@ using namespace HappyMath;
 
 Tree::Tree()
 {
+	this->numKeys = 0;
 	this->layoutNeeded = true;
 }
 
@@ -14,7 +16,7 @@ Tree::Tree()
 {
 }
 
-/*virtual*/ void Tree::Layout()
+void Tree::Layout()
 {
 	if (!this->layoutNeeded)
 		return;
@@ -25,7 +27,7 @@ Tree::Tree()
 		this->rootNode->Layout();
 }
 
-/*virtual*/ void Tree::Render()
+void Tree::Render()
 {
 	if (this->rootNode.get())
 	{
@@ -48,26 +50,23 @@ Tree::Node::Node()
 {
 }
 
-/*virtual*/ void Tree::Node::CalcBoundingRect()
-{
-	this->boundingRect.minCorner.SetComponents(-1.0, -1.0);
-	this->boundingRect.maxCorner.SetComponents(1.0, 1.0);
-}
-
 /*virtual*/ void Tree::Node::Layout()
 {
 	this->CalcBoundingRect();
 
 	this->subTreeBoundingRect = this->boundingRect;
 
-	if (this->childNodeArray.size() == 0)
+	std::vector<Node*> childNodeArray;
+	this->GetChildren(childNodeArray);
+
+	if (childNodeArray.size() == 0)
 		return;
 	
-	for (std::shared_ptr<Node>& childNode : this->childNodeArray)
+	for (Node* childNode : childNodeArray)
 		childNode->Layout();
 
 	double totalWidth = 0.0;
-	for (std::shared_ptr<Node>& childNode : this->childNodeArray)
+	for (Node* childNode : childNodeArray)
 		totalWidth += childNode->subTreeBoundingRect.GetWidth();
 
 	Vector2 center = this->boundingRect.GetCenter();
@@ -76,7 +75,7 @@ Tree::Node::Node()
 	location.x = center.x - totalWidth / 2.0;
 	location.y = center.y - this->boundingRect.GetHeight() / 2.0;
 
-	for (std::shared_ptr<Node>& childNode : this->childNodeArray)
+	for (Node* childNode : childNodeArray)
 	{
 		Vector2 childLocation = location;
 		childLocation.y -= childNode->subTreeBoundingRect.GetHeight() / 2.0;
@@ -88,28 +87,18 @@ Tree::Node::Node()
 		location.x += childNode->subTreeBoundingRect.GetWidth();
 	}
 
-	for (std::shared_ptr<Node>& childNode : this->childNodeArray)
+	for (Node* childNode : childNodeArray)
 		this->subTreeBoundingRect.ExpandToIncludeRect(childNode->subTreeBoundingRect);
-}
-
-/*virtual*/ void Tree::Node::Render()
-{
-	glBegin(GL_LINE_LOOP);
-	glColor3d(0.0, 0.0, 0.0);
-
-	glVertex2d(this->boundingRect.minCorner.x, this->boundingRect.minCorner.y);
-	glVertex2d(this->boundingRect.maxCorner.x, this->boundingRect.minCorner.y);
-	glVertex2d(this->boundingRect.maxCorner.x, this->boundingRect.maxCorner.y);
-	glVertex2d(this->boundingRect.minCorner.x, this->boundingRect.maxCorner.y);
-
-	glEnd();
 }
 
 /*virtual*/ void Tree::Node::RenderBranches()
 {
 	Vector2 parentCenter = this->boundingRect.GetCenter();
 
-	for (std::shared_ptr<Node>& childNode : this->childNodeArray)
+	std::vector<Node*> childNodeArray;
+	this->GetChildren(childNodeArray);
+
+	for (Node* childNode : childNodeArray)
 	{
 		Vector2 childCenter = childNode->boundingRect.GetCenter();
 
@@ -124,7 +113,10 @@ Tree::Node::Node()
 {
 	this->Render();
 
-	for (std::shared_ptr<Node>& childNode : this->childNodeArray)
+	std::vector<Node*> childNodeArray;
+	this->GetChildren(childNodeArray);
+
+	for (Node* childNode : childNodeArray)
 		childNode->RenderSubtree();
 }
 
@@ -138,6 +130,57 @@ Tree::Node::Node()
 {
 	this->Translate(translation);
 
-	for (std::shared_ptr<Node>& childNode : this->childNodeArray)
+	std::vector<Node*> childNodeArray;
+	this->GetChildren(childNodeArray);
+
+	for (Node* childNode : childNodeArray)
 		childNode->Translate(translation);
+}
+
+//---------------------------------- Tree::Key ----------------------------------
+
+Tree::Key::Key()
+{
+}
+
+/*virtual*/ Tree::Key::~Key()
+{
+}
+
+//---------------------------------- Tree::NumberKey ----------------------------------
+
+Tree::NumberKey::NumberKey(int number)
+{
+	this->number = number;
+}
+
+/*virtual*/ Tree::NumberKey::~NumberKey()
+{
+}
+
+/*virtual*/ bool Tree::NumberKey::IsLessThan(const Key* key) const
+{
+	return this->number < static_cast<const NumberKey*>(key)->number;
+}
+
+/*virtual*/ bool Tree::NumberKey::IsGreaterThan(const Key* key) const
+{
+	return this->number > static_cast<const NumberKey*>(key)->number;
+}
+
+/*virtual*/ bool Tree::NumberKey::IsEqualTo(const Key* key) const
+{
+	return this->number == static_cast<const NumberKey*>(key)->number;
+}
+
+/*virtual*/ bool Tree::NumberKey::ToString(std::string& givenString) const
+{
+	givenString = std::format("{}", this->number);
+	return true;
+}
+
+/*virtual*/ bool Tree::NumberKey::FromString(const std::string& givenString)
+{
+	// STPTODO: Write this.
+	return false;
 }

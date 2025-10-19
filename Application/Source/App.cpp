@@ -1,6 +1,8 @@
 #include "App.h"
 #include "Frame.h"
 #include "Tree.h"
+#include "Trees/BTree.h"
+#include <GL/glut.h>
 
 wxIMPLEMENT_APP(App);
 
@@ -17,29 +19,15 @@ App::App()
 {
 	if (!wxApp::OnInit())
 		return false;
+
+	int fakeArgc = 1;
+	char* fakeArgv[] = { (char*)"App" };
+	glutInit(&fakeArgc, fakeArgv);
+
+	this->tree = std::make_shared<BTree>(3);
 	
-	auto nodeA = std::make_shared<Tree::Node>();
-
-	auto nodeB = std::make_shared<Tree::Node>();
-	auto nodeC = std::make_shared<Tree::Node>();
-
-	auto nodeD = std::make_shared<Tree::Node>();
-	auto nodeE = std::make_shared<Tree::Node>();
-
-	auto nodeF = std::make_shared<Tree::Node>();
-	auto nodeG = std::make_shared<Tree::Node>();
-
-	nodeA->childNodeArray.push_back(nodeB);
-	nodeA->childNodeArray.push_back(nodeC);
-
-	nodeB->childNodeArray.push_back(nodeD);
-	nodeB->childNodeArray.push_back(nodeE);
-
-	nodeC->childNodeArray.push_back(nodeF);
-	nodeC->childNodeArray.push_back(nodeG);
-
-	this->tree = std::make_shared<Tree>();
-	this->tree->rootNode = nodeA;
+	for (int i = 0; i < 20; i++)
+		this->tree->InsertKey(std::make_shared<Tree::NumberKey>(i));
 
 	this->frame = new Frame(wxDefaultPosition, wxSize(2400, 1600));
 	this->frame->Show();
