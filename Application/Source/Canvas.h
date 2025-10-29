@@ -11,6 +11,7 @@ public:
 
 	void OnPaint(wxPaintEvent& event);
 	void OnSize(wxSizeEvent& event);
+	void OnKeyUp(wxKeyEvent& event);
 
 private:
 

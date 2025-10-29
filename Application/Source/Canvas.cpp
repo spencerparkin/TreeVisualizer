@@ -15,6 +15,7 @@ Canvas::Canvas(wxWindow* parent) : wxGLCanvas(parent, wxID_ANY, attributeList, w
 
 	this->Bind(wxEVT_PAINT, &Canvas::OnPaint, this);
 	this->Bind(wxEVT_SIZE, &Canvas::OnSize, this);
+	this->Bind(wxEVT_KEY_UP, &Canvas::OnKeyUp, this);
 
 	this->worldRect.minCorner.SetComponents(-10.0, -15.0);
 	this->worldRect.maxCorner.SetComponents(10.0, 5.0);
@@ -49,10 +50,7 @@ void Canvas::OnPaint(wxPaintEvent& event)
 
 	Tree* tree = wxGetApp().GetTree();
 	if (tree)
-	{
-		tree->Layout();
 		tree->Render();
-	}
 
 	glFlush();
 
@@ -65,6 +63,21 @@ void Canvas::OnSize(wxSizeEvent& event)
 
 	wxSize size = event.GetSize();
 	glViewport(0, 0, size.GetWidth(), size.GetHeight());
+
+	this->Refresh();
+}
+
+void Canvas::OnKeyUp(wxKeyEvent& event)
+{
+	Tree* tree = wxGetApp().GetTree();
+	if (!tree)
+		return;
+
+	static int i = 0;
+	std::shared_ptr<Tree::Key> key = std::make_shared<Tree::NumberKey>(i++);
+	tree->InsertKey(key);
+
+	tree->Layout();
 
 	this->Refresh();
 }

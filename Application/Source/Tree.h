@@ -85,7 +85,6 @@ public:
 	};
 
 protected:
-	bool layoutNeeded;
 	std::shared_ptr<Node> rootNode;
 	int numKeys;
 };

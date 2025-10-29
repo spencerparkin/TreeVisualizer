@@ -25,9 +25,6 @@ App::App()
 	glutInit(&fakeArgc, fakeArgv);
 
 	this->tree = std::make_shared<BTree>(3);
-	
-	for (int i = 0; i < 20; i++)
-		this->tree->InsertKey(std::make_shared<Tree::NumberKey>(i));
 
 	this->frame = new Frame(wxDefaultPosition, wxSize(2400, 1600));
 	this->frame->Show();

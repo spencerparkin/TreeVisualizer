@@ -9,7 +9,6 @@ using namespace HappyMath;
 Tree::Tree()
 {
 	this->numKeys = 0;
-	this->layoutNeeded = true;
 }
 
 /*virtual*/ Tree::~Tree()
@@ -18,11 +17,6 @@ Tree::Tree()
 
 void Tree::Layout()
 {
-	if (!this->layoutNeeded)
-		return;
-
-	this->layoutNeeded = false;
-
 	if (this->rootNode.get())
 		this->rootNode->Layout();
 }
@@ -134,7 +128,7 @@ Tree::Node::Node()
 	this->GetChildren(childNodeArray);
 
 	for (Node* childNode : childNodeArray)
-		childNode->Translate(translation);
+		childNode->TranslateSubtree(translation);
 }
 
 //---------------------------------- Tree::Key ----------------------------------
