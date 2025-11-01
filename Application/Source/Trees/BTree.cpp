@@ -62,6 +62,98 @@ BTree::BTree(int minDegree)
 
 /*virtual*/ bool BTree::RemoveKey(std::shared_ptr<Key> givenKey)
 {
+	BTreeNode* node = static_cast<BTreeNode*>(this->rootNode.get());
+
+	while (true)
+	{
+		int i = -1;
+		if (node->FindKeyIndex(givenKey.get(), i))
+		{
+			//...
+		}
+		else
+		{
+			// The caller tried to remove a key that is not present in the tree.
+			if (node->IsLeaf())
+				return false;
+
+			node->FindChildOrKeyInsertionIndex(givenKey.get(), i);
+
+			std::shared_ptr<BTreeNode> childNode = node->childNodeArray[i];
+			if (childNode->keyArray.size() < this->minDegree)
+			{
+				if (i - 1 >= 0 && node->childNodeArray[i - 1]->keyArray.size() >= this->minDegree)
+				{
+					BTreeNode* siblingNode = node->childNodeArray[i - 1].get();
+
+					std::shared_ptr<Key> keyA = node->keyArray[i];
+					std::shared_ptr<Key> keyB = siblingNode->keyArray.back();
+
+					siblingNode->keyArray.pop_back();
+					node->keyArray.insert(node->keyArray.begin() + i, keyB);
+					node->keyArray.erase(node->keyArray.begin() + (i + 1));
+					childNode->keyArray.insert(childNode->keyArray.begin(), keyA);
+
+					std::shared_ptr<BTreeNode> grandChild = siblingNode->childNodeArray.back();
+					siblingNode->childNodeArray.pop_back();
+					childNode->childNodeArray.insert(childNode->childNodeArray.begin(), grandChild);
+				}
+				else if (i + 1 < (int)node->childNodeArray.size() && node->childNodeArray[i + 1]->keyArray.size() >= this->minDegree)
+				{
+					BTreeNode* siblingNode = node->childNodeArray[i + 1].get();
+
+					std::shared_ptr<Key> keyA = node->keyArray[i];
+					std::shared_ptr<Key> keyB = siblingNode->keyArray.front();
+
+					siblingNode->keyArray.erase(siblingNode->keyArray.begin());
+					node->keyArray.insert(node->keyArray.begin() + i, keyB);
+					node->keyArray.erase(node->keyArray.begin() + (i + 1));
+					childNode->keyArray.push_back(keyA);
+
+					std::shared_ptr<BTreeNode> grandChild = siblingNode->childNodeArray.front();
+					siblingNode->childNodeArray.erase(siblingNode->childNodeArray.begin());
+					childNode->childNodeArray.push_back(grandChild);
+				}
+				else if (i - 1 >= 0)
+				{
+					std::shared_ptr<Key> key = node->keyArray[i];
+					node->keyArray.erase(node->keyArray.begin() + i);
+
+					std::shared_ptr<BTreeNode> siblingNode = node->childNodeArray[i - 1];
+					node->childNodeArray.erase(node->childNodeArray.begin() + i);
+
+					siblingNode->keyArray.push_back(key);
+					for (int j = 0; j < (int)childNode->keyArray.size(); j++)
+						siblingNode->keyArray.push_back(childNode->keyArray[j]);
+
+					for (int j = 0; j < (int)childNode->childNodeArray.size(); j++)
+						siblingNode->childNodeArray.push_back(childNode->childNodeArray[j]);
+
+					childNode = siblingNode;
+				}
+				else if (i + 1 < (int)node->childNodeArray.size())
+				{
+					std::shared_ptr<Key> key = node->keyArray[i + 1];
+					node->keyArray.erase(node->keyArray.begin() + (i + 1));
+
+					std::shared_ptr<BTreeNode> siblingNode = node->childNodeArray[i + 1];
+					node->childNodeArray.erase(node->childNodeArray.begin() + (i + 1));
+
+					childNode->keyArray.push_back(key);
+					for (int j = 0; j < (int)siblingNode->keyArray.size(); j++)
+						childNode->keyArray.push_back(siblingNode->keyArray[j]);
+
+					for (int j = 0; j < (int)siblingNode->childNodeArray.size(); j++)
+						childNode->childNodeArray.push_back(siblingNode->childNodeArray[j]);
+				}
+			}
+
+			node = childNode.get();
+		}
+	}
+
+	// ...if the root gots zero keys, shrink height of tree...
+
 	return false;
 }
 
