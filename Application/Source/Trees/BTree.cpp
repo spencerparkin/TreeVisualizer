@@ -72,7 +72,7 @@ BTree::BTree(int minDegree)
 			if (node->IsLeaf())
 			{
 				node->keyArray.erase(node->keyArray.begin() + i);
-				return true;
+				break;
 			}
 
 			std::shared_ptr<BTreeNode> nodeA = node->childNodeArray[i];
@@ -89,7 +89,7 @@ BTree::BTree(int minDegree)
 				for (int j = 0; j < (int)nodeB->childNodeArray.size(); j++)
 					nodeA->childNodeArray.push_back(nodeB->childNodeArray[j]);
 
-				return true;
+				break;
 			}
 			else
 			{
@@ -108,7 +108,7 @@ BTree::BTree(int minDegree)
 						return false;
 
 					node->keyArray[i] = predecessorKey;
-					return true;
+					break;
 				}
 				else if (nodeB->keyArray.size() > this->minDegree - 1)
 				{
@@ -121,10 +121,11 @@ BTree::BTree(int minDegree)
 						return false;
 
 					node->keyArray[i] = successorKey;
-					return true;
+					break;
 				}
 				else
 				{
+					// The tree is not a BTree.
 					assert(false);
 					return false;
 				}
@@ -211,9 +212,14 @@ BTree::BTree(int minDegree)
 		}
 	}
 
-	// ...if the root gots zero keys, shrink height of tree...
+	node = static_cast<BTreeNode*>(this->rootNode.get());
+	if (node->keyArray.size() == 0)
+	{
+		assert(node->childNodeArray.size() == 1);
+		this->rootNode = node->childNodeArray[1];
+	}
 
-	return false;
+	return true;
 }
 
 /*virtual*/ bool BTree::FindKey(std::shared_ptr<Key> givenKey, std::shared_ptr<Key>& foundKey) const
