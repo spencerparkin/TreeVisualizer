@@ -69,7 +69,66 @@ BTree::BTree(int minDegree)
 		int i = -1;
 		if (node->FindKeyIndex(givenKey.get(), i))
 		{
-			//...
+			if (node->IsLeaf())
+			{
+				node->keyArray.erase(node->keyArray.begin() + i);
+				return true;
+			}
+
+			std::shared_ptr<BTreeNode> nodeA = node->childNodeArray[i];
+			std::shared_ptr<BTreeNode> nodeB = node->childNodeArray[i + 1];
+
+			if (nodeA->keyArray.size() == this->minDegree - 1 && nodeB->keyArray.size() == this->minDegree - 1)
+			{
+				node->keyArray.erase(node->keyArray.begin() + i);
+				node->childNodeArray.erase(node->childNodeArray.begin() + (i + 1));
+
+				for (int j = 0; j < (int)nodeB->keyArray.size(); j++)
+					nodeA->keyArray.push_back(nodeB->keyArray[j]);
+
+				for (int j = 0; j < (int)nodeB->childNodeArray.size(); j++)
+					nodeA->childNodeArray.push_back(nodeB->childNodeArray[j]);
+
+				return true;
+			}
+			else
+			{
+				// At this point, I'm not sure if it matters if we go delete
+				// the predecessor or the successor.  Either one would be fine,
+				// I would think.
+
+				if (nodeA->keyArray.size() > this->minDegree - 1)
+				{
+					std::shared_ptr<BTreeNode> leafNode = nodeA;
+					while (!leafNode->IsLeaf())
+						leafNode = leafNode->childNodeArray[leafNode->childNodeArray.size() - 1];
+
+					std::shared_ptr<Key> predecessorKey = leafNode->keyArray[leafNode->keyArray.size() - 1];
+					if (!this->RemoveKey(predecessorKey))
+						return false;
+
+					node->keyArray[i] = predecessorKey;
+					return true;
+				}
+				else if (nodeB->keyArray.size() > this->minDegree - 1)
+				{
+					std::shared_ptr<BTreeNode> leafNode = nodeB;
+					while (!leafNode->IsLeaf())
+						leafNode = leafNode->childNodeArray[0];
+
+					std::shared_ptr<Key> successorKey = leafNode->keyArray[0];
+					if (!this->RemoveKey(successorKey))
+						return false;
+
+					node->keyArray[i] = successorKey;
+					return true;
+				}
+				else
+				{
+					assert(false);
+					return false;
+				}
+			}
 		}
 		else
 		{
