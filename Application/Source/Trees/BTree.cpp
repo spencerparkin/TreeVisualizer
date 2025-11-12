@@ -146,17 +146,20 @@ BTree::BTree(int minDegree)
 				{
 					BTreeNode* siblingNode = node->childNodeArray[i - 1].get();
 
-					std::shared_ptr<Key> keyA = node->keyArray[i];
+					std::shared_ptr<Key> keyA = node->keyArray[i - 1];
 					std::shared_ptr<Key> keyB = siblingNode->keyArray.back();
 
 					siblingNode->keyArray.pop_back();
-					node->keyArray.insert(node->keyArray.begin() + i, keyB);
-					node->keyArray.erase(node->keyArray.begin() + (i + 1));
+					node->keyArray.insert(node->keyArray.begin() + (i - 1), keyB);
+					node->keyArray.erase(node->keyArray.begin() + i);
 					childNode->keyArray.insert(childNode->keyArray.begin(), keyA);
 
-					std::shared_ptr<BTreeNode> grandChild = siblingNode->childNodeArray.back();
-					siblingNode->childNodeArray.pop_back();
-					childNode->childNodeArray.insert(childNode->childNodeArray.begin(), grandChild);
+					if (!childNode->IsLeaf())
+					{
+						std::shared_ptr<BTreeNode> grandChild = siblingNode->childNodeArray.back();
+						siblingNode->childNodeArray.pop_back();
+						childNode->childNodeArray.insert(childNode->childNodeArray.begin(), grandChild);
+					}
 				}
 				else if (i + 1 < (int)node->childNodeArray.size() && node->childNodeArray[i + 1]->keyArray.size() >= this->minDegree)
 				{
@@ -170,14 +173,17 @@ BTree::BTree(int minDegree)
 					node->keyArray.erase(node->keyArray.begin() + (i + 1));
 					childNode->keyArray.push_back(keyA);
 
-					std::shared_ptr<BTreeNode> grandChild = siblingNode->childNodeArray.front();
-					siblingNode->childNodeArray.erase(siblingNode->childNodeArray.begin());
-					childNode->childNodeArray.push_back(grandChild);
+					if (!childNode->IsLeaf())
+					{
+						std::shared_ptr<BTreeNode> grandChild = siblingNode->childNodeArray.front();
+						siblingNode->childNodeArray.erase(siblingNode->childNodeArray.begin());
+						childNode->childNodeArray.push_back(grandChild);
+					}
 				}
 				else if (i - 1 >= 0)
 				{
-					std::shared_ptr<Key> key = node->keyArray[i];
-					node->keyArray.erase(node->keyArray.begin() + i);
+					std::shared_ptr<Key> key = node->keyArray[i - 1];
+					node->keyArray.erase(node->keyArray.begin() + (i - 1));
 
 					std::shared_ptr<BTreeNode> siblingNode = node->childNodeArray[i - 1];
 					node->childNodeArray.erase(node->childNodeArray.begin() + i);
@@ -193,8 +199,8 @@ BTree::BTree(int minDegree)
 				}
 				else if (i + 1 < (int)node->childNodeArray.size())
 				{
-					std::shared_ptr<Key> key = node->keyArray[i + 1];
-					node->keyArray.erase(node->keyArray.begin() + (i + 1));
+					std::shared_ptr<Key> key = node->keyArray[i];
+					node->keyArray.erase(node->keyArray.begin() + i);
 
 					std::shared_ptr<BTreeNode> siblingNode = node->childNodeArray[i + 1];
 					node->childNodeArray.erase(node->childNodeArray.begin() + (i + 1));
@@ -215,8 +221,10 @@ BTree::BTree(int minDegree)
 	node = static_cast<BTreeNode*>(this->rootNode.get());
 	if (node->keyArray.size() == 0)
 	{
-		assert(node->childNodeArray.size() == 1);
-		this->rootNode = node->childNodeArray[1];
+		if (node->childNodeArray.size() == 1)
+			this->rootNode = node->childNodeArray[0];
+		else
+			this->rootNode.reset();
 	}
 
 	return true;
@@ -224,6 +232,28 @@ BTree::BTree(int minDegree)
 
 /*virtual*/ bool BTree::FindKey(std::shared_ptr<Key> givenKey, std::shared_ptr<Key>& foundKey) const
 {
+	BTreeNode* node = static_cast<BTreeNode*>(this->rootNode.get());
+	if (!node)
+		return false;
+
+	while (true)
+	{
+		int i = -1;
+		if (node->FindKeyIndex(givenKey.get(), i))
+		{
+			foundKey = node->keyArray[i];
+			return true;
+		}
+
+		if (node->IsLeaf())
+			break;
+
+		if (!node->FindChildOrKeyInsertionIndex(givenKey.get(), i))
+			break;
+
+		node = node->childNodeArray[i].get();
+	}
+
 	return false;
 }
 

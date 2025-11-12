@@ -73,9 +73,60 @@ void Canvas::OnKeyUp(wxKeyEvent& event)
 	if (!tree)
 		return;
 
-	static int i = 0;
-	std::shared_ptr<Tree::Key> key = std::make_shared<Tree::NumberKey>(i++);
-	tree->InsertKey(key);
+	switch (event.GetKeyCode())
+	{
+		case wxKeyCode::WXK_SPACE:
+		{
+			if (event.ShiftDown())
+			{
+				if (this->keyArray.size() > 0)
+				{
+					double t = double(::rand()) / double(RAND_MAX);
+					int i = int(t * double(this->keyArray.size() - 1));
+					
+					if (i < 0)
+						i = 0;
+					if (i >= (int)this->keyArray.size())
+						i = (int)this->keyArray.size() - 1;
+
+					int j = this->keyArray[i];
+					std::shared_ptr<Tree::Key> key = std::make_shared<Tree::NumberKey>(j);
+					
+					bool removed = tree->RemoveKey(key);
+					wxASSERT(removed);
+					if (!removed)
+					{
+						int b = 0;
+						b++;
+					}
+
+					this->keyArray.erase(this->keyArray.begin() + i);
+				}
+			}
+			else
+			{
+				if (this->keyArray.size() < 100)
+				{
+					std::shared_ptr<Tree::Key> key, foundKey;
+					int i = 0;
+
+					do
+					{
+						double t = double(::rand()) / double(RAND_MAX);
+						i = int(t * 100.0);
+						key = std::make_shared<Tree::NumberKey>(i);
+					} while (tree->FindKey(key, foundKey));
+
+					bool inserted = tree->InsertKey(key);
+					wxASSERT(inserted);
+
+					this->keyArray.push_back(i);
+				}
+			}
+
+			break;
+		}
+	}
 
 	tree->Layout();
 

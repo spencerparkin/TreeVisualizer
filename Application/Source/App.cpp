@@ -20,6 +20,8 @@ App::App()
 	if (!wxApp::OnInit())
 		return false;
 
+	::srand(0);
+
 	int fakeArgc = 1;
 	char* fakeArgv[] = { (char*)"App" };
 	glutInit(&fakeArgc, fakeArgv);
