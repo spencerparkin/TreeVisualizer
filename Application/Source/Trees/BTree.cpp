@@ -80,8 +80,12 @@ BTree::BTree(int minDegree)
 
 			if (nodeA->keyArray.size() == this->minDegree - 1 && nodeB->keyArray.size() == this->minDegree - 1)
 			{
+ 				std::shared_ptr<Key> key = node->keyArray[i];
+
 				node->keyArray.erase(node->keyArray.begin() + i);
 				node->childNodeArray.erase(node->childNodeArray.begin() + (i + 1));
+
+				nodeA->keyArray.push_back(key);
 
 				for (int j = 0; j < (int)nodeB->keyArray.size(); j++)
 					nodeA->keyArray.push_back(nodeB->keyArray[j]);
@@ -89,7 +93,7 @@ BTree::BTree(int minDegree)
 				for (int j = 0; j < (int)nodeB->childNodeArray.size(); j++)
 					nodeA->childNodeArray.push_back(nodeB->childNodeArray[j]);
 
-				break;
+				node = nodeA.get();
 			}
 			else
 			{
@@ -368,6 +372,20 @@ std::string BTreeNode::MakeLabel()
 	givenKeyArray.clear();
 	for (std::shared_ptr<Tree::Key>& key : this->keyArray)
 		givenKeyArray.push_back(key.get());
+}
+
+/*virtual*/ bool BTreeNode::SanityCheck()
+{
+	if (!Node::SanityCheck())
+		return false;
+
+	if (!this->IsLeaf())
+	{
+		if (this->keyArray.size() != this->childNodeArray.size() - 1)
+			return false;
+	}
+
+	return true;
 }
 
 bool BTreeNode::IsLeaf() const

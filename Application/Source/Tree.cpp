@@ -34,6 +34,14 @@ void Tree::Render()
 	}
 }
 
+/*virtual*/ bool Tree::SanityCheck()
+{
+	if (this->rootNode.get())
+		return this->rootNode->SanityCheck();
+
+	return true;
+}
+
 //---------------------------------- Tree::Node ----------------------------------
 
 Tree::Node::Node()
@@ -129,6 +137,18 @@ Tree::Node::Node()
 
 	for (Node* childNode : childNodeArray)
 		childNode->TranslateSubtree(translation);
+}
+
+/*virtual*/ bool Tree::Node::SanityCheck()
+{
+	std::vector<Node*> childNodeArray;
+	this->GetChildren(childNodeArray);
+
+	for (Node* childNode : childNodeArray)
+		if (!childNode->SanityCheck())
+			return false;
+
+	return true;
 }
 
 //---------------------------------- Tree::Key ----------------------------------

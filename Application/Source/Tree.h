@@ -21,6 +21,7 @@ public:
 	virtual bool InsertKey(std::shared_ptr<Key> givenKey) = 0;
 	virtual bool RemoveKey(std::shared_ptr<Key> givenKey) = 0;
 	virtual bool FindKey(std::shared_ptr<Key> givenKey, std::shared_ptr<Key>& foundKey) const = 0;
+	virtual bool SanityCheck();
 
 	/**
 	 * This is the base class for any kind of node in the tree.
@@ -41,6 +42,7 @@ public:
 		virtual void CalcBoundingRect() = 0;
 		virtual void GetChildren(std::vector<Node*>& givenChildNodeArray) = 0;
 		virtual void GetKeys(std::vector<Key*>& givenKeyArray) = 0;
+		virtual bool SanityCheck();
 
 	protected:
 		HappyMath::Rectangle boundingRect;

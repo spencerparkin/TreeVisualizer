@@ -91,14 +91,10 @@ void Canvas::OnKeyUp(wxKeyEvent& event)
 
 					int j = this->keyArray[i];
 					std::shared_ptr<Tree::Key> key = std::make_shared<Tree::NumberKey>(j);
-					
+
 					bool removed = tree->RemoveKey(key);
 					wxASSERT(removed);
-					if (!removed)
-					{
-						int b = 0;
-						b++;
-					}
+					wxASSERT(tree->SanityCheck());
 
 					this->keyArray.erase(this->keyArray.begin() + i);
 				}

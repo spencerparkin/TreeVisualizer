@@ -40,6 +40,7 @@ public:
 	virtual void CalcBoundingRect() override;
 	virtual void GetChildren(std::vector<Tree::Node*>& givenChildNodeArray) override;
 	virtual void GetKeys(std::vector<Tree::Key*>& givenKeyArray) override;
+	virtual bool SanityCheck() override;
 
 	bool IsLeaf() const;
 	bool IsInternal() const;
